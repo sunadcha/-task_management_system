@@ -116,3 +116,4 @@ if __name__ == "__main__":
     manager.mark_task_completed(1)
     manager.show_tasks()
     manager.save_tasks()
+    print("Testing CI/CD Pipeline")
