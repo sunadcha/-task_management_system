@@ -1,15 +1,15 @@
-# srp_ocp_tasks.py
 from abc import ABC, abstractmethod
 
 
 # --- SRP: Single Responsibility Principle ---
 class Task:
 
-    def __init__(self, task_id, description, due_date=None, completed=False):
+    def __init__(self, task_id, description, due_date=None, completed=False, priority="medium"):
         self.id = task_id
         self.description = description
         self.due_date = due_date
         self.completed = completed
+        self.priority = priority  # เพิ่ม attribute priority
 
     def mark_completed(self):
         self.completed = True
@@ -17,7 +17,7 @@ class Task:
     def __str__(self):
         status = "✓" if self.completed else " "
         due = f" (Due: {self.due_date})" if self.due_date else ""
-        return f"[{status}] {self.id}. {self.description}{due}"
+        return f"[{status}] {self.id}. {self.description}{due} [Priority: {self.priority}]"
 
 
 # Interface สำหรับบันทึกข้อมูล (OCP & DIP)
@@ -37,7 +37,7 @@ class FileTaskStorage(TaskStorage):
         with open(self.filename, "w") as f:
             for task in tasks:
                 f.write(
-                    f"{task.id},{task.description},{task.due_date},{task.completed}\n"
+                    f"{task.id},{task.description},{task.due_date},{task.completed},{task.priority}\n"
                 )
         print(f"Tasks saved to file: {self.filename}")
 
@@ -67,7 +67,7 @@ class DetailedTaskPresenter(TaskPresenter):
         for task in tasks:
             status_text = "COMPLETED" if task.completed else "PENDING"
             print(
-                f"ID: {task.id} | Status: {status_text} | Task: {task.description} | Due: {task.due_date}"
+                f"ID: {task.id} | Status: {status_text} | Task: {task.description} | Due: {task.due_date} | Priority: {task.priority}"
             )
         print("====================================================")
 
@@ -81,8 +81,8 @@ class TaskManager:
         self.storage = storage
         self.presenter = presenter
 
-    def add_task(self, description, due_date=None):
-        task = Task(self.next_id, description, due_date)
+    def add_task(self, description, due_date=None, priority="medium"):
+        task = Task(self.next_id, description, due_date, priority=priority)
         self.tasks.append(task)
         self.next_id += 1
         print(f"Task '{description}' added.")
@@ -106,11 +106,11 @@ class TaskManager:
 
 if __name__ == "__main__":
     storage = FileTaskStorage()
-    presenter = DetailedTaskPresenter()  # ใช้คลาสแสดงผลแบบใหม่
+    presenter = DetailedTaskPresenter()
 
     manager = TaskManager(storage, presenter)
-    manager.add_task("Learn SOLID Principles", "2024-08-10")
-    manager.add_task("Refactor Code", "2024-08-15")
+    manager.add_task("Learn SOLID Principles", "2024-08-10", priority="high")
+    manager.add_task("Refactor Code", "2024-08-15", priority="medium")
 
     manager.show_tasks()
     manager.mark_task_completed(1)
